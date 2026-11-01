@@ -1,0 +1,127 @@
+{
+ "primary_class": "lr",
+ "tau_star_primary_eo": 0.0,
+ "prong1_nonvacuity": {
+  "pass": false,
+  "n_forces": 8,
+  "n_cross_after_base": 0,
+  "share_below_at_base": 0.0,
+  "cond_a_ge3_crossings": false,
+  "cond_b_share_below_ge_0.40": false,
+  "breach_months": {
+   "avon-and-somerset": "2025-01",
+   "cheshire": "2025-01",
+   "cumbria": "2025-01",
+   "devon-and-cornwall": "2025-01",
+   "hertfordshire": "2025-01",
+   "kent": "2025-01",
+   "northumbria": "2025-01",
+   "sussex": "2025-01"
+  },
+  "cond_c_ge3_forces_with_label1": false,
+  "forces_with_label1": [],
+  "n_forces_with_label1": 0
+ },
+ "prong2_forecasting": {
+  "pass": false,
+  "median_lead_traq": null,
+  "coverage_traq": null,
+  "positivity": false,
+  "per_baseline": {
+   "lastvalue": {
+    "delta": null,
+    "ci_lo": null,
+    "ci_hi": null,
+    "n_boot_kept": 0,
+    "median_lead_base": null,
+    "coverage_base": null,
+    "criterion_met": false,
+    "not_evaluable": "gating cell has no labelled instances"
+   },
+   "extrap": {
+    "delta": null,
+    "ci_lo": null,
+    "ci_hi": null,
+    "n_boot_kept": 0,
+    "median_lead_base": null,
+    "coverage_base": null,
+    "criterion_met": false,
+    "not_evaluable": "gating cell has no labelled instances"
+   },
+   "cusum": {
+    "delta": null,
+    "ci_lo": null,
+    "ci_hi": null,
+    "n_boot_kept": 0,
+    "median_lead_base": null,
+    "coverage_base": null,
+    "criterion_met": false,
+    "not_evaluable": "gating cell has no labelled instances"
+   }
+  }
+ },
+ "prong3_accounting": {
+  "pass": false,
+  "primary": {
+   "median_tv50": null,
+   "median_tv20": null,
+   "pass_count": 0,
+   "n_folds": 0,
+   "pass_fraction": null,
+   "max_deviation": null,
+   "criterion_met": false,
+   "not_evaluable": "no labelled instances in the headline cell (tau* degeneracy)"
+  },
+  "secondary": {
+   "median_tv50": 0.34750000000000003,
+   "median_tv20": 0.1692307692307692,
+   "pass_count": 7,
+   "n_folds": 7,
+   "pass_fraction": 1.0,
+   "max_deviation": 0.10923076923076923,
+   "criterion_met": true
+  }
+ },
+ "forecasting_verdict": "VACUOUS AGAIN",
+ "e4_bar_cleared": false,
+ "cell_notes": {
+  "lr_eo_q70_h2": [
+   {
+    "empty_cell": "no labelled instances at this tau"
+   }
+  ],
+  "lr_eo_q70_h1": [
+   {
+    "empty_cell": "no labelled instances at this tau"
+   }
+  ],
+  "lr_dp_q70_h2": [
+   {
+    "empty_cell": "no labelled instances at this tau"
+   }
+  ],
+  "gb_eo_q70_h2": [
+   {
+    "fold": "northumbria",
+    "skipped": "LR-fit methods: single-class training pool"
+   }
+  ],
+  "gb_eo_q70_h1": [
+   {
+    "fold": "northumbria",
+    "skipped": "LR-fit methods: single-class training pool"
+   }
+  ],
+  "gb_dp_q70_h2": [],
+  "lr_eo_q60_h2": [
+   {
+    "empty_cell": "no labelled instances at this tau"
+   }
+  ],
+  "lr_eo_q80_h2": [
+   {
+    "empty_cell": "no labelled instances at this tau"
+   }
+  ]
+ }
+}

@@ -1,0 +1,56 @@
+{
+ "q_main": 0.7,
+ "taus": {
+  "lr": {
+   "eo": {
+    "q70": 0.0,
+    "q60": 0.0,
+    "q80": 0.0,
+    "n_cells": 96
+   },
+   "dp": {
+    "q70": 0.0,
+    "q60": 0.0,
+    "q80": 0.0,
+    "n_cells": 96
+   }
+  },
+  "gb": {
+   "eo": {
+    "q70": 0.0033288560014450683,
+    "q60": 0.0,
+    "q80": 0.009345794392523364,
+    "n_cells": 96
+   },
+   "dp": {
+    "q70": 0.0019342868471333324,
+    "q60": 0.0,
+    "q80": 0.0031746031746031737,
+    "n_cells": 96
+   }
+  }
+ },
+ "primary_class": "lr",
+ "secondary_class": "gb",
+ "primary_rule": "tie within 0.005 -> LR (frozen rule)",
+ "auc_holdout_lr": 0.6389954218443428,
+ "auc_holdout_gb": 0.639790712884238,
+ "tau_star_primary_eo": 0.0,
+ "prong1_population": {
+  "n_forces": 8,
+  "n_cross_after_base": 0,
+  "share_below_at_base": 0.0,
+  "cond_a_ge3_crossings": false,
+  "cond_b_share_below_ge_0.40": false,
+  "breach_months": {
+   "avon-and-somerset": "2025-01",
+   "cheshire": "2025-01",
+   "cumbria": "2025-01",
+   "devon-and-cornwall": "2025-01",
+   "hertfordshire": "2025-01",
+   "kent": "2025-01",
+   "northumbria": "2025-01",
+   "sussex": "2025-01"
+  }
+ }
+}

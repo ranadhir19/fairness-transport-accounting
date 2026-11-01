@@ -1,0 +1,115 @@
+{
+ "lr": {
+  "folds": [],
+  "median_tv50": null,
+  "median_tv20": null,
+  "pass_count": 0,
+  "n_folds": 0,
+  "pass_fraction": null,
+  "max_deviation": null,
+  "criterion_met": false,
+  "not_evaluable": "no labelled instances in the headline cell (tau* degeneracy)"
+ },
+ "gb": {
+  "folds": [
+   {
+    "fold": "avon-and-somerset",
+    "theta": 0.08507452262046773,
+    "n_null_test": 175,
+    "n_null_train": 1150,
+    "tv50": 0.42124223602484473,
+    "tv20": 0.18000000000000005,
+    "far_fold": 0.005714285714285714,
+    "far_train": 0.10695652173913044,
+    "deviation": 0.10124223602484472,
+    "pass": true,
+    "pass20": true
+   },
+   {
+    "fold": "cheshire",
+    "theta": 0.11021820435703344,
+    "n_null_test": 250,
+    "n_null_train": 1075,
+    "tv50": 0.20455813953488372,
+    "tv20": 0.04055813953488377,
+    "far_fold": 0.068,
+    "far_train": 0.10418604651162791,
+    "deviation": 0.036186046511627906,
+    "pass": true,
+    "pass20": true
+   },
+   {
+    "fold": "cumbria",
+    "theta": 0.0988048794860509,
+    "n_null_test": 250,
+    "n_null_train": 1075,
+    "tv50": 0.18251162790697673,
+    "tv20": 0.14018604651162792,
+    "far_fold": 0.028,
+    "far_train": 0.10418604651162791,
+    "deviation": 0.07618604651162791,
+    "pass": true,
+    "pass20": true
+   },
+   {
+    "fold": "devon-and-cornwall",
+    "theta": 0.09773238641705578,
+    "n_null_test": 225,
+    "n_null_train": 1100,
+    "tv50": 0.43121212121212127,
+    "tv20": 0.2638383838383838,
+    "far_fold": 0.2,
+    "far_train": 0.10363636363636364,
+    "deviation": 0.09636363636363637,
+    "pass": true,
+    "pass20": true
+   },
+   {
+    "fold": "hertfordshire",
+    "theta": 0.10466686405201465,
+    "n_null_test": 125,
+    "n_null_train": 1200,
+    "tv50": 0.34750000000000003,
+    "tv20": 0.18999999999999997,
+    "far_fold": 0.0,
+    "far_train": 0.10583333333333333,
+    "deviation": 0.10583333333333333,
+    "pass": true,
+    "pass20": true
+   },
+   {
+    "fold": "kent",
+    "theta": 0.0849963769648463,
+    "n_null_test": 100,
+    "n_null_train": 1225,
+    "tv50": 0.35632653061224484,
+    "tv20": 0.16448979591836732,
+    "far_fold": 0.01,
+    "far_train": 0.10693877551020409,
+    "deviation": 0.09693877551020409,
+    "pass": true,
+    "pass20": true
+   },
+   {
+    "fold": "sussex",
+    "theta": 0.07701379227314621,
+    "n_null_test": 25,
+    "n_null_train": 1300,
+    "tv50": 0.3146153846153847,
+    "tv20": 0.1692307692307692,
+    "far_fold": 0.0,
+    "far_train": 0.10923076923076923,
+    "deviation": 0.10923076923076923,
+    "pass": true,
+    "pass20": true
+   }
+  ],
+  "median_tv50": 0.34750000000000003,
+  "median_tv20": 0.1692307692307692,
+  "pass_count": 7,
+  "n_folds": 7,
+  "pass_fraction": 1.0,
+  "max_deviation": 0.10923076923076923,
+  "criterion_met": true
+ }
+}

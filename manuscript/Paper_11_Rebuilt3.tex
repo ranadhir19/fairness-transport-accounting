@@ -1,0 +1,725 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\title{Transport Bounds for Fairness Statistics: An Accounting Audit
+Across Two Monitoring Programmes and the Documented Failure of
+Threshold-Crossing Forecasting}
+\author{Ranadhir Ghosh}
+\date{}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+When a deployed classifier is monitored for fairness, the quantities
+under audit are fairness statistics --- the equalised-odds (EO) and
+demographic-parity (DP) gaps --- yet the transport theory available
+to monitoring has priced a different object, the false-alarm rate
+(FAR) of an alarm rule. This paper closes that gap. A single
+stratum-wise lemma --- the event-probability bound that the FAR
+theory already rests on, applied conditionally --- yields transport
+bounds for the gap statistics themselves: the DP transport between
+two populations is at most the sum of the two group-conditional
+score-law total variations, and the EO transport is at most the
+maximum of the label-stratified transport sums, in exactly the
+max-form in which the pipelines compute the EO gap. The forms are
+tight as functions of the stratum variations alone, and a prevalence
+decomposition reduces the DP bound to FAR-type quantities plus named,
+measurable terms. We then transport the field's accounting protocol
+--- per-fold comparison of realised transport against distributional
+transport, at a fixed criterion --- from the FAR to the gap
+functionals and run it on two monitoring programmes: US
+income/employment/coverage classifiers across six states, and UK
+police stop-and-search risk scores across nine forces. The recorded
+FAR-accounting verdicts whose fold artifacts survive (three of five)
+are reproduced under the gap bound; the family-1 gap criterion is
+met on the folds that survive there (median transport quantity
+0.110, 6/6 folds); the two verdicts whose folds were lost in an
+archive migration are attributed to the FAR accounting only, and
+said so. On the second programme the gap accounting is correct but
+loose --- the gaps there are small and barely move --- and the FAR
+accounting remains the binding evidence. The paper's second half is
+the negative record this audit was built to serve: a five-year
+programme to forecast fairness-breach crossings failed its
+pre-registered falsifier on family 1 twice (the second time under a
+scale-adapted design built to exclude the first failure's
+explanation), and twice failed to produce a testable cell on family
+2, for two distinct reasons that we prove are theorems about the
+monitoring design --- crossing rarity and cut degeneracy --- rather
+than implementation accidents. A fitted-model analysis then shows
+the failure is consistent with, but not explained by, a
+history-value bound: at family 1's measured regime the bound
+permits the record. The forecasting claim is retired; what survives
+is a bound, an audit, and a documented boundary.
+\end{abstract}
+
+\section{Introduction}
+
+Fairness monitoring of a deployed classifier produces, at each
+monitoring step, a small set of audited statistics --- in this
+paper, the equalised-odds and demographic-parity gaps of a frozen
+scoring rule on labelled batches. A natural theoretical question
+for any such programme is accounting: when the audited statistic
+moves between two populations (two jurisdictions, two periods, a
+training pool and a deployment site), can the movement be priced by
+how far the underlying distributions have moved? The one transport statement available for this purpose prices the wrong object: it bounds the change in a threshold rule's \emph{false-alarm rate} between states by the total-variation (TV) distance of the states' null score distributions. That statement is correct and classical --- it is the definitional single-event TV bound, scoped to FAR transport in this programme's own upgrade cycle, with its provenance stated exactly in Section~\ref{sec:bound} and no novelty claimed for it anywhere in this programme. But an auditor who wants
+to know whether an observed \emph{gap} movement is within what
+distributional transport allows finds no bound for the gap in the
+text: the theorem's functional and the audited functional are
+different objects.
+
+This paper's first contribution closes that mismatch, and does so
+without new machinery. Section~\ref{sec:bound} shows that the FAR
+bound's own single-event argument, applied stratum-wise, composes
+into transport bounds for the DP and EO gaps in exactly the forms
+the monitoring pipelines compute --- including the EO gap's
+max-of-components form, which the bound matches with a maximum of
+transport sums. The bounds are tight in the stratum TVs, and the DP
+bound admits a reduction to FAR-type (label-0) transports plus
+prevalence terms, so the two theories are one theory at two
+granularities.
+
+The second contribution is an audit. An accounting protocol ---
+per-fold, realised transport against distributional transport,
+judged at a criterion fixed before outcomes --- existed for the
+FAR. Section~\ref{sec:accounting} transports it to the gap
+functionals and runs both accountings on the two programmes this
+work has monitored: family 1, classifiers over US American
+Community Survey tasks in six states; family 2, risk scores over UK
+police stop-and-search records in nine forces. Three of the five
+recorded FAR verdicts reproduce under the gap bound on their own
+folds; two cannot be re-adjudicated at all, because their folds
+were lost, and the paper says which and why rather than letting the
+stronger theorem silently absorb them.
+
+The third contribution is a negative result, reported as one. The
+programmes existed to test whether fairness-breach crossings can be
+\emph{forecast} --- alarmed before they occur, at a controlled
+false-alarm rate, with a lead time beating trivial extrapolation.
+That claim was pre-registered with a binding falsifier, and it
+failed: on family 1 at the original absolute threshold, and again
+under a scale-adapted threshold design built after the first
+failure to exclude its most plausible excuse. On family 2 the test
+could not even be run twice, for two distinct structural reasons
+--- too few crossings exist to score, and the deployed scores
+degenerate below the decision cut --- which
+Section~\ref{sec:vacuity} states as theorems about monitoring
+designs rather than as bad luck. Section~\ref{sec:boundary} asks
+whether a history-value bound explains the forecasting failure and
+answers honestly: at the measured regime it does not; it permits
+the record. The claim is retired in Section~\ref{sec:forecasting}.
+
+Nothing in the theory is novel as mathematics, and the paper does
+not pretend otherwise: the stratum lemma is the classical
+single-event TV bound. The contribution is the composition, the
+audit at two granularities across two real monitoring programmes,
+and a failure record complete enough to be useful to whoever tries
+next.
+
+\section{Monitored statistics and monitoring programmes}
+\label{sec:objects}
+
+A population is a law over records $(S, A, Y)$: $S = s(X) \in [0,1]$
+the output of one fixed deployed scoring rule $s$ (the same
+function for every population --- the monitoring scenario is a
+frozen model under drift), $A \in \{0,1\}$ a binarised protected
+attribute, $Y \in \{0,1\}$ the label. The decision is
+$\hat Y = \mathbf 1\{S \ge c\}$ at the pipelines' decision cut
+$c = 0.5$. For a stratum $C \in \{A{=}a\} \cup \{(Y{=}y, A{=}a)\}$,
+write $R_p(C) = \Pr_p[\hat Y = 1 \mid C]$ and
+$\mu_p^C = \mathrm{Law}_p(S \mid C)$. The monitored statistics, in
+the exact form both programmes' pipelines compute them, are
+\[
+\mathrm{DP}_p = \bigl| R_p(A{=}1) - R_p(A{=}0) \bigr|,
+\qquad
+\mathrm{EO}_p = \max\Bigl(
+\bigl| R_p(1,1) - R_p(1,0) \bigr|,\;
+\bigl| R_p(0,1) - R_p(0,0) \bigr| \Bigr),
+\]
+where $R_p(y,a) = R_p(Y{=}y, A{=}a)$: the EO gap is the
+\emph{maximum} of the true-positive-rate and false-positive-rate
+differences, not either component alone, and a component whose
+stratum is empty in a sample is dropped by the pipelines (the
+population reading: the component is undefined; see the scope
+remark in Section~\ref{sec:bound}).
+
+\paragraph{Family 1.} Three ACS tasks \cite{acs} (income,
+employment, public coverage) $\times$ six states (CA, FL, NY, PA,
+TX, WA) $\times$ years 2014--2019. One frozen logistic regression per task, trained
+on pooled 2014 data, never retrained; monitoring steps are years.
+Family 1's original build is also the source of the forecasting
+programme of Section~\ref{sec:forecasting}.
+
+\paragraph{Family 2.} UK police stop-and-search records
+\cite{policeuk} (data.police.uk), calendar 2024 (confirmatory) and
+2025 (a second, untouched year used by the adapted design of
+Section~\ref{sec:forecasting}). An inclusion rule frozen before
+outcomes admitted 9 of 13 candidate forces for 2024 (71{,}347 usable
+records) and 8 for 2025 (65{,}826). Two model classes are monitored:
+logistic regression (LR) and gradient boosting (GB), each trained
+once on pooled base-month data and frozen; monitoring steps are
+months; the protected attribute is the recorded ethnicity
+binarisation of the source data. Family 2 was constructed as an
+independent second family for the accounting audit, with no overlap
+with family 1's design decisions beyond the shared protocol.
+
+\paragraph{The forecasters under audit.} The forecasting programme (Section~\ref{sec:forecasting}) evaluates candidate alarm rules against trivial baselines at a matched false-alarm rate. All forecasters act on instances (trajectory, step), whose label is whether the trajectory's gap crosses the threshold within the horizon $H$, scored from batch-observable step features: current and lagged values of the monitored gap, one-step changes, history slopes, the score-distribution gap between groups, group-share and prevalence shifts and their changes, and per-metric drift budgets. The control forecaster, CTRL --- the programme's original proposed forecaster, unchanged --- is a logistic regression on those features, Platt-calibrated (sigmoid calibration fitted by 3-fold cross-validation on the training trajectories), alarming when the calibrated score exceeds a single global threshold per (cell, FAR target), the threshold chosen on the training trajectories by the pick rule: the threshold whose achieved training FAR is closest to the target, ties toward the smaller FAR. The primary candidate, TRA-Q, uses the \emph{same fitted model as CTRL in the same fold} --- identical instance scores; only the alarm rule differs. TRA-Q alarms at step $t$ of a trajectory in target state $s$ iff $p_t \ge \theta_{s,t}$, where $\theta_{s,t}$ is the weighted $(1-q)$ quantile of a two-component pool: the global pool $G$ of all training-fold instance scores, each point weighted $(1-\lambda_t)/|G|$, and the trajectory's own pool $O_t$ of its scores at steps from the series start through $t$ inclusive, each point weighted $\lambda_t/|O_t|$, with $\lambda_t = |O_t| / (|O_t| + \kappa)$ and $\kappa = 3$. The level $q$ is calibrated per (cell, FAR target, fold) by simulating the full rule on the training trajectories, choosing the $q$ minimising $|\text{achieved training FAR} - \text{target}|$, ties toward the smaller FAR, and is then frozen for the test state. The falsifier's operating point is FAR target $0.10$; targets $0.05$ and $0.20$ are computed and reported without headline force, and the headline cells use horizon $H = 2$ steps. Baselines, each calibrated on the same training trajectories to the same FAR targets: last-value persistence, linear extrapolation of the gap trajectory, and a CUSUM detector (slack $0.02$, the original threshold grid); FairCanary-style point and interval detectors and a climatology reference were also computed. Full specifications are frozen in the programme's pre-registrations, deposited with the artifacts (Section~\ref{sec:repro}).
+
+\section{The transport bound for the gap statistics}
+\label{sec:bound}
+
+\begin{lemma}[Stratum lemma]
+\label{lem:stratum}
+For every stratum $C$ with $\Pr_p(C), \Pr_q(C) > 0$,
+$|R_p(C) - R_q(C)| \le \mathrm{TV}(\mu_p^C, \mu_q^C)$.
+\end{lemma}
+
+\begin{proof}
+$R_p(C) = \mu_p^C([c,1])$ and $R_q(C) = \mu_q^C([c,1])$ --- the
+same event under both laws, because $s$ and $c$ are state-blind ---
+and a single event's probability difference is at most the total
+variation, by its variational definition.
+\end{proof}
+
+The FAR transport statement is this lemma with $C$ the null-step population and $\mu$ a forecaster's step-score law: a false-alarm rate is one event's probability under one conditional score law. Its provenance, stated exactly because later sections lean on it: the inequality is the definitional single-event TV bound and is classical; its scoping to the false-alarm-rate transport of a fairness-monitoring alarm is this programme's own, fixed in the upgrade cycle's pre-registration (2026-10-29), for which a concept-level prior-art check --- recorded in that pre-registration, and described there as concept-level rather than exhaustive --- found no published statement of a bound or impossibility for a monitoring alarm's FAR transport across sites in terms of the null score distribution, and none in the fairness-monitoring setting. The classical neighbouring form is the domain-adaptation bound of Ben-David et al.~\cite{bendavid2010}, which prices a target \emph{error} by a source error plus a divergence plus a shared-hypothesis term --- a different functional, as here. No novelty is claimed for the inequality itself; the gap bounds below are the same argument composed over the strata that define the gaps.
+
+\begin{theorem}[DP transport]
+\label{thm:dp}
+$|\mathrm{DP}_p - \mathrm{DP}_q| \le D_{\mathrm{DP}}(p,q) :=
+\mathrm{TV}(\mu_p^{A=1}, \mu_q^{A=1}) +
+\mathrm{TV}(\mu_p^{A=0}, \mu_q^{A=0})$.
+\end{theorem}
+
+\begin{proof}
+By the reverse triangle inequality and then the triangle
+inequality,
+$|\mathrm{DP}_p - \mathrm{DP}_q|
+\le |(R_p(A{=}1) - R_q(A{=}1)) - (R_p(A{=}0) - R_q(A{=}0))|
+\le \sum_a |R_p(A{=}a) - R_q(A{=}a)|$,
+and Lemma~\ref{lem:stratum} bounds each term.
+\end{proof}
+
+\begin{theorem}[EO transport]
+\label{thm:eo}
+Let $D_{\mathrm{TPR}} = \sum_a \mathrm{TV}(\mu_p^{1,a}, \mu_q^{1,a})$
+and $D_{\mathrm{FPR}} = \sum_a \mathrm{TV}(\mu_p^{0,a}, \mu_q^{0,a})$.
+Then the component transports satisfy
+$|\mathrm{TPRgap}_p - \mathrm{TPRgap}_q| \le D_{\mathrm{TPR}}$ and
+$|\mathrm{FPRgap}_p - \mathrm{FPRgap}_q| \le D_{\mathrm{FPR}}$, and
+\[
+|\mathrm{EO}_p - \mathrm{EO}_q| \le D_{\mathrm{EO}}(p,q) :=
+\max\bigl(D_{\mathrm{TPR}},\, D_{\mathrm{FPR}}\bigr).
+\]
+\end{theorem}
+
+\begin{proof}
+Each component is a two-group difference of stratum rates, so
+Theorem~\ref{thm:dp}'s argument within the stratum family gives
+the component bounds. For the max form,
+$|\max(u,v) - \max(u',v')| \le \max(|u-u'|, |v-v'|)$ for
+nonnegative $u,v,u',v'$ (if $\max(u,v) \ge \max(u',v')$, say $\max(u,v) = u$, then $\max(u,v) - \max(u',v') \le u - u' \le |u-u'|$; the other case is symmetric), applied to
+the two components.
+\end{proof}
+
+\paragraph{Scope remark.} The statements assume the strata
+involved have positive mass under both populations. The component
+bounds hold family by family whenever that family's strata are
+positive in both; where a stratum has mass zero in one population,
+the corresponding gap component is undefined in the pipelines too
+--- statistic and bound lose the same component at the same place.
+Section~\ref{sec:vacuity} meets the empirical extreme of this
+condition.
+
+\begin{proposition}[Reduction to FAR-type quantities]
+\label{prop:reduction}
+With prevalences $\pi_p(a) = \Pr_p[Y{=}1 \mid A{=}a]$, the law of
+total probability gives
+$R_p(A{=}a) = \pi_p(a) R_p(1,a) + (1-\pi_p(a)) R_p(0,a)$, and hence
+$|\mathrm{DP}_p - \mathrm{DP}_q|$ is at most
+$\sum_a \bigl\{ \pi_p(a)\,\mathrm{TV}(\mu_p^{1,a}, \mu_q^{1,a})
++ (1-\pi_p(a))\,\mathrm{TV}(\mu_p^{0,a}, \mu_q^{0,a})
++ |\pi_p(a) - \pi_q(a)| \cdot |R_q(1,a) - R_q(0,a)| \bigr\}$:
+the DP transport is bounded by label-stratified transports --- the
+label-0 terms being exactly the FAR-type objects of
+Lemma~\ref{lem:stratum} --- plus named prevalence terms, every one measurable from the same records as the gaps.
+\end{proposition}
+
+\begin{proof}
+Fix $a$, and abbreviate $R_p = R_p(A{=}a)$, $\pi_p = \pi_p(a)$,
+$R_p(y) = R_p(y,a)$, and likewise for $q$. By the law of total
+probability over $Y$, $R_p = \pi_p R_p(1) + (1-\pi_p) R_p(0)$ and
+$R_q = \pi_q R_q(1) + (1-\pi_q) R_q(0)$. Adding and subtracting
+$\pi_p R_q(1) + (1-\pi_p) R_q(0)$ gives the identity
+\[
+R_p - R_q = \pi_p \bigl[R_p(1) - R_q(1)\bigr]
++ (1-\pi_p) \bigl[R_p(0) - R_q(0)\bigr]
++ \bigl[\pi_p - \pi_q\bigr] \cdot \bigl[R_q(1) - R_q(0)\bigr],
+\]
+exactly --- an identity in the three displayed differences, not an
+inequality. Taking absolute values, using the triangle inequality
+term by term and the nonnegativity of the weights $\pi_p$ and
+$1-\pi_p$, and applying Lemma~\ref{lem:stratum} to the two rate
+differences, $|R_p(y) - R_q(y)| \le
+\mathrm{TV}(\mu_p^{y,a}, \mu_q^{y,a})$, gives the per-group bound;
+summing over $a \in \{0,1\}$ and applying the triangle inequality
+once more to $\mathrm{DP}_p - \mathrm{DP}_q = [R_p(A{=}1) -
+R_q(A{=}1)] - [R_p(A{=}0) - R_q(A{=}0)]$ yields the displayed bound.
+The label-0 terms are the FAR-type objects: $R(0,a)$ is a label-0
+conditional alarm rate, priced by the same single-event argument
+as the FAR itself.
+\end{proof}
+
+\begin{corollary}[Covariate form]
+Both theorems hold with every score law $\mu$ replaced by the corresponding covariate law $\nu = \mathrm{Law}(X \mid C)$, in the same sum and max forms.
+\end{corollary}
+
+\begin{proof}
+Each score law is the pushforward of the corresponding covariate
+law through the common map $s$: $\mu^C = \nu^C \circ s^{-1}$.
+Total variation contracts under a common channel (data
+processing): for every measurable $E$,
+$|\mu^C(E) - \mu'^C(E)| = |\nu^C(s^{-1}E) - \nu'^C(s^{-1}E)|
+\le \mathrm{TV}(\nu^C, \nu'^C)$, and taking the supremum over
+$E$ on the left gives $\mathrm{TV}(\mu^C, \mu'^C) \le
+\mathrm{TV}(\nu^C, \nu'^C)$. Substituting the covariate TVs for
+the score TVs throughout Theorems~\ref{thm:dp} and~\ref{thm:eo}
+--- the right-hand sides weakly increase, the forms are unchanged
+--- gives the claim.
+\end{proof}
+
+\begin{proposition}[Tightness of form]
+The sum and max forms are best possible as functions of the stratum
+TVs alone: for any stratum-TV profile with $D \le 1$ there are
+population pairs attaining equality (two-point score laws per
+stratum, the unaffected strata held identical). Where $D > 1$ the bounds are vacuous and no tightness claim is needed.
+\end{proposition}
+
+\begin{proof}
+Hold every stratum not under construction identical across $p$
+and $q$; its TV and its rate difference are then $0$, so the
+constructions compose stratum by stratum. \emph{Single stratum.}
+Fix $d \in [0,1]$ and $r \in [0, 1-d]$. Let the stratum's score
+law under $p$ put mass $r+d$ on a point at or above the cut $c$
+and $1-r-d$ below it, and under $q$ put mass $r$ above and $1-r$
+below (two-point laws, the cut lying between the two support
+points). The laws differ only in the mass at the upper point, so
+$\mathrm{TV} = d$; the stratum rates are $r+d$ and $r$, so the
+rate difference is exactly $d$. \emph{Sum form.} Apply the
+single-stratum construction in both groups with variations
+$d_1, d_0$, choosing directions so the two group-rate differences
+enter $\mathrm{DP}_p - \mathrm{DP}_q$ with the same sign (group
+1's rate higher under $p$ by $d_1$, group 0's lower under $p$ by
+$d_0$). Then $|\mathrm{DP}_p - \mathrm{DP}_q| = d_1 + d_0 =
+D_{\mathrm{DP}}$: equality in the sum form, the triangle-inequality
+step of Theorem~\ref{thm:dp} being tight exactly when the two
+signed differences align in this way. \emph{Max form.} Apply the
+sum-form equality construction within the label-1 strata only,
+with profile $D_{\mathrm{TPR}} \ge D_{\mathrm{FPR}}$, and hold
+the label-0 strata identical, so $D_{\mathrm{FPR}} = 0$ and the
+FPR-gap difference is $0$. Then $|\mathrm{EO}_p -
+\mathrm{EO}_q| = |\mathrm{TPRgap}_p - \mathrm{TPRgap}_q| =
+D_{\mathrm{TPR}} = \max(D_{\mathrm{TPR}}, D_{\mathrm{FPR}})$:
+equality in the max form. Each stratum needs only rate headroom
+$r + d \le 1$, available whenever the profile satisfies $D \le
+1$; for $D > 1$ the bound exceeds the maximum possible gap
+difference and is vacuous.
+\end{proof}
+
+\section{The accounting protocol, for both functionals}
+\label{sec:accounting}
+
+An accounting audit asks, per fold of a cross-population design,
+whether the realised transport of an audited functional is within
+the distributional transport the relevant theorem prices. The protocol was fixed for the FAR in this programme's upgrade cycle (its T4 protocol) and is transported here to the gaps unchanged in form. Fix a functional $G$ (the FAR
+of the CTRL forecaster at its FAR-matched threshold; or the EO gap;
+or the DP gap) and its transport quantity $D_G$ (the null
+step-score TV for the FAR; $D_{\mathrm{EO}}$ / $D_{\mathrm{DP}}$
+above). For each leave-one-population-out fold, with test
+population the held-out unit and train population the pooled
+remainder: compute the realised difference
+$r_k = |G_{\mathrm{test}} - G_{\mathrm{train}}|$ and the estimator
+$\hat D_{G,k}$ of $D_G$ between the same two populations. The
+estimator is the pipelines' histogram TV throughout: score samples
+(the conditional samples of Section~\ref{sec:bound} for the gaps;
+null step-score samples for the FAR) are clipped to $[0,1]$ and
+binned into 50 equal-width bins, and
+$\hat{\mathrm{TV}} = \tfrac12 \sum_i |\hat p_i - \hat q_i|$.
+A fold \emph{passes} iff $r_k \le \hat D_{G,k} + 0.02$, and the
+cell's criterion is \emph{met} iff the median fold
+$\hat D_G \ge 0.05$ (the accounting must price non-trivial
+transport) and the pass fraction is at least $0.99$. Two honesty
+notes are part of the protocol, not footnotes to it. Binning
+contracts TV, so $\hat D_G$ estimates $D_G$ from below: a criterion
+pass is an empirical fact about the accounting at the registered
+slack $0.02$ --- a design constant inherited from the FAR protocol,
+not a derived concentration bound --- not a corollary of the
+theorems, which bound $r_k$ by the unbinned $D_G$. And a verdict is
+a claim about one functional under one theorem: this paper never
+lets a FAR verdict stand in for a gap verdict, or vice versa;
+Section~\ref{sec:results} attributes each recorded verdict to the
+accounting that produced it.
+
+\section{Accounting results}
+\label{sec:results}
+
+\paragraph{The FAR accounting, as recorded.} Table~\ref{tab:far}
+collects the five recorded verdicts of the earlier cycles. They are
+reproduced here as recorded --- each is a verdict about the FAR
+functional under the stratum lemma, on the folds named.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lllll}
+\toprule
+Cell & Median TV50 & Folds & Verdict & Fold artifacts \\
+\midrule
+Family 1, LR & 0.3481 & 50/50 & met & lost (see text) \\
+Family 1, GB & 0.1358 & 50/51 & \textbf{not met} & lost (see text) \\
+Family 2 2024, LR & 0.4784 & 9/9 & met & survive \\
+Family 2 2024, GB & 0.2865 & 9/9 & met & survive \\
+Family 2 2025, GB & 0.3475 & 7/7 & met & survive \\
+\bottomrule
+\end{tabular}
+\caption{The FAR accounting (T4 protocol), as recorded in the
+programme's cycle reports. The family-1 GB cell missed on one fold
+by 0.0034 beyond the slack. The family-1 folds come from an
+expanded 51-jurisdiction design whose artifact tree did not survive
+an archive migration; the surviving family-1 record is the cycle
+reports and an independent tester's recomputation of those cells.}
+\label{tab:far}
+\end{table}
+
+\paragraph{The gap accounting.} Table~\ref{tab:gap} runs the same
+protocol with $G \in \{\mathrm{EO}, \mathrm{DP}\}$ on every fold
+partition whose per-record artifacts survive. On family 2 the
+criterion is met for both statistics in every cell --- and with
+very wide margins, because the realised gap transports there are
+tiny (maximum 0.0165): family 2's deployed gaps are small (test-fold
+EO gaps at most 0.024) and barely move between forces, so the gap
+accounting, while correct, is loose, and the FAR accounting remains
+the binding evidence on that programme. On the family-1 folds that
+survive --- the six-state leave-one-out partition of the adapted
+design's secondary arm, a different and smaller partition than the
+lost 51-jurisdiction design --- the criterion is likewise met for
+both statistics, and there it does real work: realised EO
+transports up to 0.052 are priced by transport quantities with
+median 0.110 and minimum fold margin 0.085.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lllll}
+\toprule
+Cell & Statistic & Median $\hat D$ & Pass & Min margin \\
+\midrule
+Family 2 2024, LR & EO & 0.4149 & 9/9 & 0.2718 \\
+ & DP & 0.3135 & 9/9 & 0.2667 \\
+Family 2 2024, GB & EO & 0.5011 & 9/9 & 0.3112 \\
+ & DP & 0.4427 & 9/9 & 0.2958 \\
+Family 2 2025, GB & EO & 0.3442 & 7/7 & 0.2886 \\
+ & DP & 0.3241 & 7/7 & 0.2819 \\
+Family 1 arm, LR & EO & 0.1104 & 6/6 & 0.0854 \\
+ & DP & 0.1020 & 6/6 & 0.0745 \\
+\bottomrule
+\end{tabular}
+\caption{The gap accounting (this paper). Criterion: median
+$\hat D \ge 0.05$ and pass fraction $\ge 0.99$; margin
+$= \hat D + 0.02 - r_k$ on the tightest fold. Family-2 2025 LR
+quantities were also computed (EO median 0.2845, DP 0.2787, 7/7)
+but are descriptive only: no recorded verdict exists for that cell,
+the LR statistic being degenerate there
+(Section~\ref{sec:vacuity}). A 20-bin sensitivity check of the FAR
+accounting on family 2 2024 GB failed on one fold (cumbria); the
+50-bin convention is the registered one throughout.}
+\label{tab:gap}
+\end{table}
+
+\paragraph{Re-adjudication.} Applying the rule fixed before the
+gap computation --- a recorded verdict follows under the gap bound
+iff its own folds' artifacts survive and the gap criterion
+reproduces its outcome for both statistics --- the three family-2
+verdicts of Table~\ref{tab:far} \textbf{follow}: each is now a
+verdict under both accountings. The two family-1 verdicts
+\textbf{stand outside} the gap bound, for the archival reason in
+Table~\ref{tab:far}: their folds do not exist to be recomputed,
+and the six-state computation above, which concerns different
+folds, is a corollary about family 1, not a re-adjudication of
+them. The family-1 GB \emph{not met} therefore remains what it
+always was --- a FAR-accounting fact --- and is not converted,
+quietly or otherwise, into a gap statement.
+
+\section{The forecasting programme and its failure}
+\label{sec:forecasting}
+
+The programmes above were built to test a stronger claim than
+accounting: that a fairness statistic's threshold crossing can be
+forecast --- alarmed at least one step ahead, at a controlled
+false-alarm rate, with lead times beating trivial baselines. The
+claim was pre-registered (FALSIFIER-U) with a binding decision
+rule: on the confirmatory arm, the primary forecaster must beat
+\emph{all three} baselines (extrapolation, last-value, CUSUM) on
+median lead time, with bootstrap intervals excluding ties where the
+design requires it. It failed, twice on family 1 and by
+non-existence of a test on family 2.
+
+\paragraph{Family 1, absolute threshold.} At the original design
+(gap threshold $\tau = 0.05$, horizon $H = 2$ years), TRA-Q's median
+lead over covered crossings was 2.0 years --- identical to naive
+extrapolation's 2.0 --- at coverage 0.451 of the full-scope
+crossing set. The falsifier fired: no lead-time advantage over the
+trivial baseline it had to beat.
+
+\paragraph{Family 1, scale-adapted threshold.} A second cycle asked
+whether the failure was an artefact of the absolute threshold,
+which sits far in the tail of family 2's gap distribution and
+arbitrarily within family 1's. Its design adapted the threshold to
+the monitored statistic's own scale,
+$\tau^* = Q_{0.70}$ of the pooled population gaps --- a constant
+anchored to family 1's original design audit (where the operative
+0.05 sits at the 69.4th percentile), fixed before any confirmatory
+run, and applied to an untouched evaluation. On that arm the test
+was fully non-vacuous (7 of 18 trajectories cross after base;
+prong-1 and the accounting prong both passed) and the falsifier
+fired again, in its most informative form: TRA-Q's median lead was
+3.0 years at coverage 0.606, but the margin over extrapolation was
+exactly $0.0$ --- a tie, the falsifier's signature --- against
+$+1.0$ over last-value (bootstrap CI $[-1.0, 4.0]$, containing 0)
+and $+1.0$ over CUSUM (CI $[1.0, 3.0]$, the one criterion met).
+The prong required all three; it failed.
+
+\paragraph{Family 2.} Twice, no test existed.
+Section~\ref{sec:vacuity} gives the two mechanisms as results; the
+facts are these. In 2024, at the headline cell, LR population EO
+gaps reach the registered $\tau = 0.05$ in only 2 of 108 force-month
+cells, and trajectories cross after the base month only twice
+across the threshold grid's first point (then 1, 0, 0): the
+scoreability floor of three crossings is not met, for reasons the
+crossing-rarity corollary prices exactly. In 2025, the adapted
+threshold itself degenerated: $\tau^*(\mathrm{LR}, \mathrm{EO}) =
+0.0$ (and likewise for DP), because the deployed LR's scores reach the $0.5$ cut for only $21$ of that year's $65{,}826$ records. In $81$ of the $96$ force-month cells no record reaches the cut at all, so every stratum rate is $0$ and the gaps are identically zero in $84.4\%$ of cells; the remaining $15$ cells hold one to four above-cut records each, moving stratum rates only inside small strata --- gaps at most $0.031$, except one cell whose single above-cut record sits in a five-record stratum and produces a gap of $0.20$. With $84.4\%$ of the pooled cell gaps exactly $0$, the adapted quantile itself is $0$ and there is nothing to forecast. GB in 2025 did produce an evaluable accounting
+arm (Table~\ref{tab:gap}'s companion FAR cell) but only one
+crossing force: no forecasting adjudication is possible at $n = 1$,
+and none is claimed.
+
+\paragraph{Retirement.} The forecasting claim has failed every
+non-vacuous test given to it, and the adapted design excludes the
+``wrong threshold'' explanation of the first failure. It is
+therefore retired, not revised: no further forecaster from this
+programme will be proposed on this evidence, and the remainder of
+the paper concerns what the programme established instead --- the
+bound, the audit, and the two design theorems below.
+
+\section{Two vacuity mechanisms, as theorems}
+\label{sec:vacuity}
+
+\begin{corollary}[Crossing rarity]
+If a trajectory's per-step crossing probability is at most
+$\bar p$ at threshold $\tau$, the probability of any crossing in a
+window of $m$ post-base steps is at most $m \bar p$ (union bound),
+and a design whose expected crossing count
+$(\text{trajectories} \times m \times \bar p)$ falls below its
+registered scoreability floor cannot adjudicate forecasting at
+$\tau$, whatever forecaster is supplied. Family 2, 2024: the
+measured cell share at $\tau = 0.05$ is $\hat p = 2/108 = 0.0185$
+over the $9 \times 12$ force-month cells (enumerated cell-wise in
+the deposited population table), giving an expected-crossing bound
+of $9 \times 11 \times \hat p = 1.83$ against a floor of 3 ---
+matching the observed 2 crossings. Family 1's consistency check: the measured cell share at the same threshold is $33/108 = 0.306$ over the $18 \times 6$ task--state--year cells, giving an expected-crossing bound of $18 \times 5 \times 33/108 = 27.5$ over the $18$ trajectories' $5$ post-base steps, and crossings are plentiful --- as observed. In both applications $\hat p$ is the measured share from the same cells to which the corollary is applied --- a plug-in estimate where the corollary is stated for a bound $\bar p$ --- so the two numbers are expected-count diagnostics at the measured share, not strict bounds at a known $\bar p$.
+\end{corollary}
+
+\begin{proposition}[Cut degeneracy]
+If a deployed rule's scores on a population satisfy
+$\Pr[S \ge c \mid Y{=}y, A{=}a] = 0$ for every stratum --- the
+scores never reach the decision cut --- then every gap of
+Section~\ref{sec:objects} is identically $0$ on that population,
+every quantile-adapted threshold of the form
+$Q_q(\text{population gaps})$ is $0$ for every $q$ in the range the
+adapted design used ($0.60$--$0.80$), and no crossing-based test on
+that population has content. Family 2's 2025 LR cell is the instance, cell by cell: in $81$ of the $96$ force-month cells the condition holds exactly --- no record's score reaches the cut, every stratum rate is $0$, and that cell's gaps are identically $0$ --- while the remaining $15$ cells hold the corpus's only $21$ above-cut records and have small nonzero gaps (at most $0.031$, except the one five-record-stratum cell at $0.20$). The pooled conclusion then follows from the zero share, not from the proposition alone: because $81/96 = 84.4\%$ of the pooled cell gaps are exactly $0$, a share exceeding every registered sensitivity quantile, $\tau^* = Q_q(\text{pooled gaps}) = 0$ at $q \in \{0.60, 0.70, 0.80\}$.
+\end{proposition}
+
+Both results are elementary; their value is diagnostic. A
+monitoring programme can fail to test forecasting for reasons that
+are knowable from the design sheet and the score distribution
+\emph{before} any forecaster is built, and both of family 2's
+failures were of that kind.
+
+\section{The boundary of explanation}
+\label{sec:boundary}
+
+Does a bound on the value of history explain the forecasting
+failure? The bound in question prices information sets, and must
+be stated before it can be evaluated. Write $\Delta_t$ for the
+population gap at step $t$, $\mathcal{F}_t$ for the full batch
+history to step $t$, and $\mathcal{G}_t =
+\sigma(\hat\Delta_{t-1}, \hat\Delta_t)$ for the reference
+information: the last two batch gap estimates alone.
+
+\begin{lemma}[History-value bound, at the strength proved]
+\label{lem:history}
+Let $X$ be any measurable function of the future evolution after
+step $t$ (in particular the next $H$ population gaps) and let
+$\delta_t := \mathrm{E}\bigl[\mathrm{TV}\bigl(\mathrm{Law}(X
+\mid \mathcal{F}_t), \mathrm{Law}(X \mid
+\mathcal{G}_t)\bigr)\bigr]$. For any $\mathcal{F}_t$-measurable
+alarm rule $A$ (external randomisation allowed), the
+$\mathcal{G}_t$-measurable rule $A'$ that fires with probability
+$\mathrm{P}(A \text{ fires} \mid \mathcal{G}_t)$ satisfies
+$|\mathrm{P}(A \text{ fires}, X \in B) - \mathrm{P}(A' \text{
+fires}, X \in B)| \le \delta_t$ for every measurable $B$.
+Consequently per-step alarm probabilities, and false-alarm rates
+averaged over steps, of the two rules differ by at most $\delta
+:= \sup_t \delta_t$; coverage and joint-lead probabilities differ
+by at most $(T-1)\delta$ over $T$ monitored steps, and that
+clause is carried only at union-bound-sketch level. The stronger
+form registered for this lemma --- coverage and joint lead also
+at $\delta$ --- is false in general: an independent checker
+exhibited disjoint future sub-windows, each at per-step distance
+$\delta$, whose coverage probabilities separate by $\approx
+k\delta/2$. No verdict in this paper uses the strong form.
+\end{lemma}
+
+The proof (a covariance identity, then the variational
+definition of TV applied conditionally) and the checker's
+obligation-by-obligation adjudication of it are in the deposited
+record (Section~\ref{sec:repro}). To size $\delta$ at family 1's
+regime, a companion analysis fitted Model G --- a two-channel
+Gaussian state-space model of the gap process, $\Delta_{t+1} =
+\Delta_t + \mu_t + \eta_t$ with AR(1) level drift $\mu_{t+1} =
+\phi\mu_t + \zeta_t$, observed through batches $Y_t = \Delta_t +
+\varepsilon_t$ with batch-noise scale $\sigma_n$ --- to the
+family's measured increments. Under Model G the future path is
+Gaussian under both information sets with a common innovation
+covariance, and Pinsker's inequality with Jensen's inequality
+gives $\delta \le \sqrt{\bar{\mathrm{KL}}/2}$, where
+$\bar{\mathrm{KL}} := \mathrm{E}\bigl[\mathrm{KL}\bigl(
+\mathrm{Law}(X \mid \mathcal{F}_t) \,\|\, \mathrm{Law}(X \mid
+\mathcal{G}_t)\bigr)\bigr]$ is the mean per-step divergence
+between the history-conditional and reference predictive laws:
+$\delta$ is the per-step total-variation price of the history
+the reference rule cannot see. At the measured regime the
+increments' fitted lag-1 and lag-2 autocovariances are
+non-positive, which no interior Model G parameterisation fits,
+so the drift channel projects to its boundary ($\phi = 0$,
+drift variance $0$): the drift channel is exactly zero. The
+level channel gives $\bar{\mathrm{KL}} = 0.167$, hence
+$\hat\delta = \sqrt{0.167/2} = 0.289$ (the divergence
+independently Monte-Carlo-confirmed at $0.167 \pm 0.0003$).
+Batch noise is $\sigma_n = 0.037$, about $2.4\times$ the
+per-step increment scale $\sigma_{\mathrm{inc}} = 0.015$ ---
+history genuinely informs the level, because the noise on each
+batch is larger than the movement between batches.
+
+Against that number, the commissioned corollary --- that this
+bound explains the two family-1 falsifications --- fails by an
+order of magnitude: it would have needed $\delta \le
+0.038$--$0.043$ on the covered-only reading and $\le 0.0086$ on
+the all-instances reading, and no probed parameterisation of
+the fitted model brings $\hat\delta$ below $0.18$. The weakened
+coverage clause is no rescue either: at family 1's $T = 6$,
+$(T-1)\hat\delta = 1.45$ is vacuous. The bound therefore
+\emph{permits} the record rather than explaining it, and the
+forecasters still could not beat extrapolation. The two vacuity
+events of Section~\ref{sec:vacuity} are covered, but by that
+section's own results --- the crossing-rarity corollary's
+counting bound and the cut-degeneracy proposition's determinism
+argument --- each verified cell-wise against the record by the
+same independent checker; the history-value analysis covers
+neither falsification, and this paper does not let it borrow
+theirs. We report the boundary as a boundary: the explanation
+of the forecasting failure is, at present, the failure itself,
+documented at pre-registered strength.
+
+\section{Related work}
+
+The monitoring literature's reference system, FairCanary
+\cite{faircanary}, detects and attributes bias in a deployed model
+after it emerges; it has no forecasting component, which is the gap
+this programme set out --- and failed --- to fill. The fairness
+statistics are those of \cite{dwork2012,hardt2016}; transport and
+drift accounting via score-distribution TV follows the drift
+quantities of the FairCanary lineage \cite{faircanary}. Within
+this journal, concept-drift work is method-first
+\cite{crypsis}: detection-and-mitigation algorithms evaluated on
+benchmarks. The present paper differs in kind: it is an audit of a
+monitoring programme's own statistics and claims, with the
+programme's negative result reported at the same evidentiary
+standard as its positive one --- a genre the journal's scope
+explicitly houses under evaluating, consolidating, and explaining
+discovered knowledge, and under the reporting of successes and
+failures of KDD in application.
+
+\section{Limitations}
+
+Four, plainly. (1) The theory is classical: the stratum lemma is
+the textbook single-event bound, and the paper claims composition
+and audit, not a new inequality. (2) The family-1 expanded-design
+artifacts were lost in an archive migration; the affected verdicts
+are reported from the cycle record and an independent
+recomputation, are attributed to the FAR accounting only, and the
+gap re-adjudication of those folds is impossible --- a
+data-management failure this paper discloses rather than repairs
+retroactively. (3) On family 2 the gap accounting is loose
+(Section~\ref{sec:results}); the transport quantities there bound
+gap movements an order of magnitude larger than any observed, so
+the family-2 gap verdicts certify correctness of the accounting,
+not its tightness. (4) EO monitoring presumes labelled batches ---
+an audit setting; DP does not --- and both programmes binarise
+their protected attributes as their source data require, which
+coarsens the fairness questions that can be asked.
+
+\section{Reproducibility}
+\label{sec:repro}
+
+Every quantitative claim in this paper traces to a frozen artifact:
+the pre-registrations of each cycle (with SHA-256 hashes recorded
+at freeze time), the saved per-record score files for both
+families, the fold-detail tables of both accountings, and
+validator scripts that recompute the headline criteria from those
+artifacts (all passing at the time of writing). The theory of
+Section~\ref{sec:bound} and the boundary analysis of
+Section~\ref{sec:boundary} were additionally checked by an
+independent checker working from separately written code, whose
+reports are part of the deposited record. The exception is
+Limitation (2): the family-1 expanded design's original run files
+no longer exist, and its two verdicts rest on the cycle reports
+plus the independent tester's recomputation of them. A deposit package, \texttt{fairness-transport-accounting},
+has been assembled from these artifacts and validated
+end-to-end: the cycles' pre-registrations, the proof records
+and both independent checkers' reports, the surviving
+fold-detail tables of both accountings, the family-2 population
+tables with the per-cell score summary behind
+Sections~\ref{sec:forecasting} and~\ref{sec:vacuity}, and a
+validator script that recomputes the headline criteria of
+Sections~\ref{sec:results} and~\ref{sec:vacuity} from the
+deposited tables, all checks passing at the time of writing.
+The package is forthcoming as a public repository under the
+author's GitHub account
+(\texttt{ranadhir19/fairness-transport-accounting}).
+
+\begin{thebibliography}{9}
+\bibitem{dwork2012} Dwork, C., Hardt, M., Pitassi, T., Reingold,
+O., Zemel, R.: Fairness through awareness. ITCS 2012.
+\bibitem{hardt2016} Hardt, M., Price, E., Srebro, N.: Equality of
+opportunity in supervised learning. NeurIPS 2016.
+\bibitem{faircanary} Ghosh, A., Shanbhag, A., Wilson, C.:
+FairCanary: an auditing tool for fair machine learning (AIES
+2022; arXiv:2106.07057).
+\bibitem{crypsis} Crypsis: an elitism-driven observer-based
+approach for detection and mitigation of concept drift. Data
+Mining and Knowledge Discovery (2026). DOI
+10.1007/s10618-026-01191-1.
+\bibitem{bendavid2010} Ben-David, S., Blitzer, J., Crammer, K.,
+Kulesza, A., Pereira, F., Vaughan, J.~W.: A theory of learning
+from different domains. Machine Learning 79, 151--175 (2010).
+\bibitem{policeuk} data.police.uk: UK police stop-and-search open
+data, 2024--2025 extracts.
+\bibitem{acs} US Census Bureau: American Community Survey,
+2014--2019 (folktables construction).
+\end{thebibliography}
+
+\end{document}
